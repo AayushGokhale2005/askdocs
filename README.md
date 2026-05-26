@@ -6,6 +6,15 @@ A terminal-based, learning-first code editor. The AI layer is a Socratic tutor â
 
 ## Install (use like `vim`)
 
+### Homebrew (recommended)
+
+```bash
+brew tap askdocs/tap
+brew install askdocs
+```
+
+### From source
+
 **One-time setup** so `askdocs` works in Mac Terminal, iTerm, etc.:
 
 ```bash
