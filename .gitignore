@@ -1,4 +1,5 @@
 ./landing_page/
 build/
 .local/
+homebrew-tap/
 .DS_Store
