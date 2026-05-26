@@ -1,0 +1,20 @@
+---
+id: cpp.vectors
+lang: cpp
+title: std::vector
+links:
+  - https://en.cppreference.com/w/cpp/container/vector
+requires:
+  - cpp.variables
+concepts: vector, containers, iteration
+---
+
+`std::vector` is a dynamic array — contiguous storage, amortized O(1) push_back.
+
+```cpp
+#include <vector>
+std::vector<int> data{1, 2, 3};
+for (int v : data) { /* ... */ }
+```
+
+Compare: when is `vector` better than a raw array?

@@ -1,0 +1,21 @@
+---
+id: cpp.pointers
+lang: cpp
+title: Pointers and References
+links:
+  - https://en.cppreference.com/w/cpp/language/pointer
+  - https://en.cppreference.com/w/cpp/language/reference
+requires:
+  - cpp.variables
+concepts: pointers, references, memory, address
+---
+
+A pointer stores an address; a reference is an alias to an existing object.
+
+```cpp
+int x = 10;
+int* px = &x;   // pointer
+int& rx = x;    // reference
+```
+
+Trace: what happens if the referent goes out of scope?

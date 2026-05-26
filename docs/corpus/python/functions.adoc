@@ -1,0 +1,19 @@
+---
+id: python.functions
+lang: python
+title: Defining Functions
+links:
+  - https://docs.python.org/3/tutorial/controlflow.html#defining-functions
+requires:
+  - python.variables
+concepts: functions, parameters, return
+---
+
+Functions encapsulate reusable logic. Define with `def`, call by name.
+
+```python
+def greet(name):
+    return f"hello, {name}"
+```
+
+Key ideas: parameters vs arguments, return value vs side effects, scope.

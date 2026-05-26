@@ -1,0 +1,26 @@
+---
+id: cpp.classes
+lang: cpp
+title: Classes and Objects
+links:
+  - https://en.cppreference.com/w/cpp/language/classes
+requires:
+  - cpp.variables
+  - cpp.pointers
+concepts: classes, objects, encapsulation, constructors
+---
+
+Classes bundle data and behavior. Constructors initialize invariants.
+
+```cpp
+class Counter {
+public:
+    Counter() : value_(0) {}
+    void increment() { ++value_; }
+    int get() const { return value_; }
+private:
+    int value_;
+};
+```
+
+What invariant does your constructor guarantee?

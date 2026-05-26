@@ -1,0 +1,19 @@
+---
+id: cpp.variables
+lang: cpp
+title: Variables and Types
+links:
+  - https://en.cppreference.com/w/cpp/language/types
+requires: []
+concepts: variables, types, initialization
+---
+
+C++ variables have static types. The compiler checks operations at compile time.
+
+```cpp
+int count = 0;
+double ratio = 3.14;
+std::string name = "askdocs";
+```
+
+Ask: what is the difference between default initialization and value initialization?

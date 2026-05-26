@@ -1,0 +1,22 @@
+---
+id: python.for-loops
+lang: python
+title: For Loops
+links:
+  - https://docs.python.org/3/tutorial/controlflow.html#for-statements
+requires:
+  - python.variables
+concepts: loops, iteration, for, range
+---
+
+`for` iterates over any iterable — lists, strings, ranges.
+
+```python
+for i in range(3):
+    print(i)
+
+for ch in "abc":
+    print(ch)
+```
+
+Mental model: iterator yields items one at a time; loop body runs per item.

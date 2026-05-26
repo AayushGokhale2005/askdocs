@@ -1,0 +1,20 @@
+---
+id: python.list-comprehensions
+lang: python
+title: List Comprehensions
+links:
+  - https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions
+requires:
+  - python.for-loops
+  - python.functions
+concepts: comprehensions, lists, filtering
+---
+
+Comprehensions build lists concisely from iterables.
+
+```python
+squares = [x * x for x in range(5)]
+evens = [x for x in range(10) if x % 2 == 0]
+```
+
+Before using one: could you write the equivalent `for` loop first?

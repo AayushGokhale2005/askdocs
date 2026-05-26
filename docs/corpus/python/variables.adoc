@@ -1,0 +1,19 @@
+---
+id: python.variables
+lang: python
+title: Variables and Types
+links:
+  - https://docs.python.org/3/tutorial/introduction.html#using-python-as-a-calculator
+requires: []
+concepts: variables, types, assignment
+---
+
+Variables bind names to values. Python is dynamically typed — you don't declare types upfront.
+
+```python
+x = 42
+name = "askdocs"
+pi = 3.14
+```
+
+Ask yourself: what type does each name refer to, and when does it change?
