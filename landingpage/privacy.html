@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — AskDocs</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="legal-page">
+
+<div class="site-frame">
+  <div class="site-inner">
+
+    <a href="index.html" class="back-home">← Back to AskDocs Home</a>
+
+    <header class="legal-header">
+      <h1>Privacy Policy</h1>
+      <p>How AskDocs handles information for the macOS app and this website.</p>
+      <p class="legal-updated">Last updated: May 26, 2026</p>
+    </header>
+
+    <section class="legal-section">
+      <h2>1. Overview</h2>
+      <p>AskDocs (“we”, “us”) provides a terminal-native code editor with an AI tutor, currently in public beta for macOS. This policy explains what information is processed when you use the AskDocs application and when you visit our marketing website.</p>
+      <p>We design AskDocs to keep your code on your machine. We do not require an account to use the beta. We do not sell personal information.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>2. Scope</h2>
+      <p>This policy covers:</p>
+      <ul>
+        <li>The AskDocs desktop application (installed via Homebrew or from source)</li>
+        <li>The askdocs.dev marketing website and documentation pages</li>
+      </ul>
+      <p>Third-party documentation sites (Wikipedia, cppreference, Python docs) have their own privacy policies when the app fetches content over the network.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>3. Information we process</h2>
+      <h3>Application (local)</h3>
+      <ul>
+        <li>Files you open, edit, and save on your Mac</li>
+        <li>Chat messages and tutor commands you type in the app</li>
+        <li>Workspace paths and @-mention file slices used as tutor context</li>
+        <li>Editor and UI preferences stored on your device</li>
+      </ul>
+      <p>This data stays on your Mac unless you explicitly trigger a network request (for example, online doc search for <code>/learn</code> or <code>/explain</code>).</p>
+
+      <h3>Application (network)</h3>
+      <p>When online search is enabled (default; disable with <code>ASKDOCS_ONLINE=0</code>), the app sends HTTP requests via <code>curl</code> to public documentation services. Those requests may include:</p>
+      <ul>
+        <li>Search terms derived from your tutor command or selected code symbols</li>
+        <li>Standard request metadata (IP address, user-agent, timestamps) received by the remote server</li>
+      </ul>
+      <p>We do not operate those servers. See our <a href="data-collection.html">Data Collection</a> page for details.</p>
+
+      <h3>Website</h3>
+      <ul>
+        <li>Basic server or hosting logs (IP address, browser type, pages viewed) if provided by our host</li>
+        <li>Cookie consent preference stored in your browser (see <a href="cookies.html">Cookie Policy</a>)</li>
+        <li>System fonts used on this site (no third-party font requests)</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>4. What we do not collect (beta)</h2>
+      <ul>
+        <li>No AskDocs user accounts or cloud sync in the current beta</li>
+        <li>No in-app analytics or crash reporting SDKs in the open-source beta build</li>
+        <li>No uploading of your full repository or chat history to AskDocs servers</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>5. Legal bases (EEA/UK visitors)</h2>
+      <p>If you are in the EEA or UK, we rely on:</p>
+      <ul>
+        <li><strong>Legitimate interests</strong> — operating and improving the website, securing our services, and responding to inquiries</li>
+        <li><strong>Consent</strong> — non-essential cookies on this website, where applicable</li>
+        <li><strong>Contract / pre-contractual steps</strong> — providing the software you choose to install</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>6. Retention</h2>
+      <ul>
+        <li>Local app data persists until you delete files or uninstall AskDocs</li>
+        <li>Website cookie consent choice is stored until you clear site data or withdraw consent</li>
+        <li>Hosting logs, if any, are retained only as long as needed for security and operations</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>7. Your rights</h2>
+      <p>Depending on where you live, you may have rights to access, correct, delete, or restrict processing of personal information, or to object to certain processing. Because the app stores data locally, most controls are in your hands — uninstall the app or delete local files.</p>
+      <p>To exercise rights related to website data, contact <a href="mailto:aayushgokhale375@gmail.com">aayushgokhale375@gmail.com</a>.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>8. Children</h2>
+      <p>AskDocs is not directed at children under 13 (or 16 where applicable). We do not knowingly collect personal information from children.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>9. Changes</h2>
+      <p>We may update this policy as the beta evolves. Material changes will be reflected by updating the “Last updated” date. Continued use after changes constitutes acceptance where permitted by law.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>10. Contact</h2>
+      <p>Questions about privacy: <a href="mailto:aayushgokhale375@gmail.com">aayushgokhale375@gmail.com</a></p>
+    </section>
+
+    <nav class="legal-nav" aria-label="Related policies">
+      <a href="data-collection.html">Data Collection</a>
+      <a href="cookies.html">Cookie Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </nav>
+
+    <div class="footer-bottom">
+      <p>© 2026 AskDocs · <a href="index.html">Home</a></p>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

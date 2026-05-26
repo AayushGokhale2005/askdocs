@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Collection — AskDocs</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="legal-page">
+
+<div class="site-frame">
+  <div class="site-inner">
+
+    <a href="index.html" class="back-home">← Back to AskDocs Home</a>
+
+    <header class="legal-header">
+      <h1>Data Collection</h1>
+      <p>A transparent breakdown of what AskDocs reads, stores, and sends — locally and over the network.</p>
+      <p class="legal-updated">Last updated: May 26, 2026</p>
+    </header>
+
+    <section class="legal-section">
+      <h2>Summary</h2>
+      <p>AskDocs is a local-first editor. The beta does not phone home to AskDocs cloud services. The main off-device data flow is optional online documentation lookup initiated by you.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>Data stored on your Mac</h2>
+      <table class="legal-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Purpose</th>
+            <th>Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Source files you open</td>
+            <td>Editing and syntax highlighting</td>
+            <td>Your filesystem</td>
+          </tr>
+          <tr>
+            <td>Chat / tutor transcript (session)</td>
+            <td>Display tutor responses in the TUI</td>
+            <td>Memory (current session)</td>
+          </tr>
+          <tr>
+            <td>@file slices attached to messages</td>
+            <td>Provide targeted context to the tutor</td>
+            <td>Read from your workspace; not uploaded to AskDocs</td>
+          </tr>
+          <tr>
+            <td>Workspace file index</td>
+            <td>@ autocomplete and local search</td>
+            <td>Built in memory from your project tree</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="legal-section">
+      <h2>Data sent over the network</h2>
+      <p>Network activity occurs only when online doc search is enabled and you run commands that need external references (for example <code>/learn</code>, <code>/explain</code>, <code>/hint</code>).</p>
+
+      <table class="legal-table">
+        <thead>
+          <tr>
+            <th>Destination</th>
+            <th>What is sent</th>
+            <th>When</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>en.cppreference.com</td>
+            <td>Search terms from your query or code symbols</td>
+            <td>C/C++ doc lookup</td>
+          </tr>
+          <tr>
+            <td>docs.python.org</td>
+            <td>Search terms from your query</td>
+            <td>Python doc lookup</td>
+          </tr>
+          <tr>
+            <td>en.wikipedia.org</td>
+            <td>Search terms (OpenSearch + summary API)</td>
+            <td>Fallback / general topics</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Requests are made with <code>curl</code> from your machine. Third parties may log your IP address and request contents under their own policies. Set <code>ASKDOCS_ONLINE=0</code> or run <code>askdocs --offline</code> to disable outbound doc search entirely.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>Data we do not collect</h2>
+      <ul>
+        <li>No AskDocs account credentials (accounts not offered in beta)</li>
+        <li>No keystroke logging to remote servers</li>
+        <li>No automatic upload of project source code</li>
+        <li>No advertising identifiers</li>
+        <li>No proprietary analytics pipeline in the current open beta</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>Website data collection</h2>
+      <p>This marketing site is static and lightweight:</p>
+      <ul>
+        <li><strong>No third-party scripts</strong> — pure HTML and CSS</li>
+        <li><strong>System fonts only</strong> — no external font requests</li>
+        <li><strong>Hosting logs</strong> — our CDN/host may log requests for security (depends on deployment)</li>
+      </ul>
+      <p>We do not embed third-party advertising or analytics scripts in the landing page.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>Future beta features</h2>
+      <p>Planned features (for example cloud sync, optional AI backends, or crash reporting) may introduce new data flows. We will publish updates here and in the Privacy Policy before enabling them by default.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>Contact</h2>
+      <p>Questions about data practices: <a href="mailto:aayushgokhale375@gmail.com">aayushgokhale375@gmail.com</a></p>
+    </section>
+
+    <nav class="legal-nav" aria-label="Related policies">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="cookies.html">Cookie Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </nav>
+
+    <div class="footer-bottom">
+      <p>© 2026 AskDocs · <a href="index.html">Home</a></p>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

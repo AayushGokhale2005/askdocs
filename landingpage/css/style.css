@@ -1,0 +1,873 @@
+/* AskDocs — 90's Internet Revival Edition */
+/* Best viewed in Netscape Navigator 4.0 (just kidding, any browser works) */
+
+:root {
+  --phosphor: #6bff9a;
+  --phosphor-dim: #3d9960;
+  --amber: #ffb347;
+  --hot-pink: #ff66cc;
+  --cyan: #00ffff;
+  --purple: #cc99ff;
+  --yellow: #ffff00;
+  --bg-deep: #0a0c0b;
+  --bg-panel: #111614;
+  --text: #e8f0ea;
+  --text-muted: #7a8f82;
+  --link: var(--phosphor);
+  --link-visited: var(--purple);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  background-color: var(--bg-deep);
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, var(--phosphor) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 65%, var(--amber) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 15%, var(--cyan) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 55%, var(--hot-pink) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 90%, var(--purple) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 80%, #fff 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 8%, #fff 0%, transparent 100%),
+    linear-gradient(180deg, #000022 0%, var(--bg-deep) 40%, #001a0d 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Classic tiled border frame */
+.site-frame {
+  max-width: 960px;
+  margin: 12px auto;
+  padding: 4px;
+  border: 4px ridge var(--phosphor);
+  background: repeating-linear-gradient(
+    45deg,
+    var(--bg-panel) 0px,
+    var(--bg-panel) 8px,
+    #0d1210 8px,
+    #0d1210 16px
+  );
+  box-shadow:
+    0 0 0 2px var(--amber),
+    0 0 24px rgba(107, 255, 154, 0.25),
+    inset 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+.site-inner {
+  background: var(--bg-panel);
+  border: 2px inset #333;
+  padding: 8px;
+}
+
+a {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+a:visited {
+  color: var(--link-visited);
+}
+
+a:hover {
+  color: var(--amber);
+  background: rgba(255, 179, 71, 0.15);
+}
+
+code,
+kbd,
+.terminal {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.95em;
+}
+
+code {
+  background: #000;
+  color: var(--phosphor);
+  padding: 1px 4px;
+  border: 1px solid var(--phosphor-dim);
+}
+
+kbd {
+  background: #ccc;
+  color: #000;
+  padding: 2px 6px;
+  border: 2px outset #eee;
+  border-radius: 2px;
+}
+
+/* ── Header ── */
+.site-header {
+  text-align: center;
+  padding: 12px 8px;
+  border: 3px double var(--amber);
+  background: linear-gradient(180deg, #1a2a1f 0%, var(--bg-panel) 100%);
+  margin-bottom: 8px;
+}
+
+.site-header__brand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+}
+
+.site-header__brand:hover {
+  background: none;
+}
+
+.site-logo {
+  display: block;
+  width: 100px;
+  height: auto;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+}
+
+.site-header__name {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--phosphor);
+  text-shadow: 2px 2px 0 var(--hot-pink);
+}
+
+.site-header__logo {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 2.4rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: var(--phosphor);
+  text-shadow:
+    2px 2px 0 var(--hot-pink),
+    4px 4px 0 var(--cyan);
+  letter-spacing: 2px;
+}
+
+.site-header__logo:hover {
+  background: none;
+  animation: wobble 0.3s ease infinite;
+}
+
+.site-tagline {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 4px 0 8px;
+}
+
+.badge-row {
+  margin-top: 6px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border: 2px outset var(--amber);
+  background: #332200;
+  color: var(--amber);
+}
+
+.badge--new {
+  background: var(--hot-pink);
+  color: #000;
+  border-color: #fff;
+  animation: blink 1s step-start infinite;
+}
+
+.badge--beta {
+  background: var(--phosphor);
+  color: #000;
+  border-color: var(--phosphor-dim);
+}
+
+/* ── Nav ── */
+.site-nav {
+  margin-bottom: 8px;
+}
+
+.site-nav table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.site-nav td {
+  text-align: center;
+  padding: 6px 4px;
+  border: 2px outset var(--phosphor-dim);
+  background: linear-gradient(180deg, #1f2f24 0%, #152018 100%);
+}
+
+.site-nav a {
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: block;
+}
+
+.site-nav a:hover {
+  color: var(--yellow);
+}
+
+/* ── Marquee strip ── */
+.marquee-strip {
+  background: #000;
+  border: 2px inset var(--phosphor);
+  padding: 4px 0;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.marquee-strip marquee {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.85rem;
+  color: var(--phosphor);
+}
+
+.marquee-strip .prompt {
+  color: var(--amber);
+}
+
+/* ── Sections ── */
+section {
+  margin-bottom: 16px;
+}
+
+.section-box {
+  border: 3px groove var(--cyan);
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.5rem;
+  color: var(--amber);
+  text-align: center;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 1px 1px 0 var(--hot-pink);
+}
+
+.section-subtitle {
+  display: none;
+}
+
+.feature-list {
+  list-style: square;
+  padding-left: 24px;
+  margin: 0;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+  color: var(--phosphor);
+}
+
+.feature-list li {
+  margin-bottom: 4px;
+}
+
+.footer-links {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  margin: 8px 0;
+}
+
+.footer-links a {
+  text-transform: lowercase;
+}
+
+#install .code-block {
+  margin-bottom: 8px;
+}
+
+.screenshot-placeholder {
+  font-family: "Courier New", Courier, monospace;
+  color: var(--phosphor-dim);
+  font-size: 0.85rem;
+}
+
+.rainbow-hr {
+  height: 4px;
+  border: none;
+  margin: 12px 0;
+  background: linear-gradient(
+    90deg,
+    var(--hot-pink),
+    var(--amber),
+    var(--yellow),
+    var(--phosphor),
+    var(--cyan),
+    var(--purple),
+    var(--hot-pink)
+  );
+  animation: rainbow-shift 4s linear infinite;
+}
+
+/* ── Hero ── */
+.hero-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.hero-table td {
+  vertical-align: top;
+  padding: 8px;
+}
+
+.hero-text h1 {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.8rem;
+  line-height: 1.3;
+  color: var(--phosphor);
+  margin: 0 0 12px;
+}
+
+.hero-text h1 .rainbow {
+  animation: rainbow-text 3s linear infinite;
+}
+
+.hero-text p {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+}
+
+.hero-meta {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-top: 1px dashed var(--phosphor-dim);
+  padding-top: 8px;
+  margin-top: 12px;
+}
+
+.hero-meta span {
+  margin-right: 12px;
+}
+
+/* Buttons — classic beveled 90's */
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.btn {
+  display: inline-block;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  text-decoration: none;
+  cursor: pointer;
+  border: 3px outset;
+}
+
+.btn--primary {
+  background: var(--phosphor);
+  color: #000;
+  border-color: #9affb8 #2d6640 #2d6640 #9affb8;
+}
+
+.btn--primary:hover {
+  background: var(--amber);
+  color: #000;
+  border-color: #ffd699 #996622 #996622 #ffd699;
+}
+
+.btn--primary:active {
+  border-style: inset;
+}
+
+.btn--ghost {
+  background: #222;
+  color: var(--phosphor);
+  border-color: #555 #111 #111 #555;
+}
+
+.btn--ghost:hover {
+  color: var(--amber);
+}
+
+/* Screenshot placeholder */
+.screenshot-box {
+  border: 4px inset #333;
+  background: #000;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+  position: relative;
+}
+
+.screenshot-box img {
+  max-width: 100%;
+  height: auto;
+  border: 2px solid var(--phosphor);
+  display: block;
+}
+
+.screenshot-box--featured {
+  min-height: 260px;
+}
+
+.screenshot-placeholder {
+  font-family: "Courier New", Courier, monospace;
+  color: var(--phosphor-dim);
+  font-size: 0.85rem;
+}
+
+.screenshot-placeholder__icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 8px;
+  animation: blink 2s step-start infinite;
+}
+
+.screenshot-caption {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.75rem;
+  color: var(--amber);
+  margin-top: 6px;
+  text-align: center;
+}
+
+/* Screenshots grid */
+.screenshot-grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 8px;
+}
+
+.screenshot-grid td {
+  width: 33.33%;
+  vertical-align: top;
+}
+
+/* Features */
+.features-grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 8px;
+}
+
+.feature-card {
+  border: 3px ridge var(--purple);
+  background: linear-gradient(135deg, #151a18 0%, #0d100f 100%);
+  padding: 8px;
+  height: 100%;
+  vertical-align: top;
+}
+
+.feature-card__num {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--hot-pink);
+  display: block;
+}
+
+.feature-card__title {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.95rem;
+  color: var(--amber);
+  margin: 0 0 4px;
+  text-transform: lowercase;
+}
+
+.feature-card__body {
+  font-size: 0.8rem;
+  margin: 0 0 6px;
+  color: var(--text-muted);
+}
+
+.feature-card__tag {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.75rem;
+  color: var(--phosphor);
+  background: #000;
+  padding: 2px 6px;
+  border: 1px dashed var(--phosphor-dim);
+  display: inline-block;
+}
+
+/* Install */
+.install-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.install-table td {
+  vertical-align: top;
+  padding: 8px;
+  width: 50%;
+}
+
+.install-req {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+.install-req__icon {
+  color: var(--hot-pink);
+  font-size: 1rem;
+}
+
+.install-req strong {
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  color: var(--amber);
+}
+
+.install-step {
+  margin-bottom: 12px;
+}
+
+.install-step__label {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.install-step__num {
+  color: var(--hot-pink);
+  font-weight: bold;
+}
+
+.code-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #000;
+  border: 2px inset #444;
+  padding: 8px 12px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+}
+
+.code-block .prompt {
+  color: var(--amber);
+  font-weight: bold;
+}
+
+.code-block code {
+  background: none;
+  border: none;
+  padding: 0;
+  flex: 1;
+}
+
+.install-cta {
+  text-align: center;
+  border: 4px double var(--phosphor);
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(107, 255, 154, 0.1) 0%, transparent 100%);
+  margin-top: 12px;
+}
+
+.install-cta h3 {
+  font-family: "Courier New", Courier, monospace;
+  color: var(--phosphor);
+  margin: 0 0 8px;
+}
+
+.install-cta p {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+}
+
+/* ── Footer ── */
+.site-footer {
+  margin-top: 16px;
+  border-top: 3px double var(--amber);
+  padding-top: 12px;
+}
+
+.footer-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.footer-table td {
+  vertical-align: top;
+  padding: 8px;
+  font-size: 0.85rem;
+}
+
+.footer-table h4 {
+  font-family: "Courier New", Courier, monospace;
+  color: var(--amber);
+  font-size: 0.9rem;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.footer-table ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-table li {
+  margin-bottom: 4px;
+}
+
+.footer-bottom {
+  text-align: center;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 12px 8px;
+  border-top: 1px dashed var(--phosphor-dim);
+  margin-top: 8px;
+}
+
+.hit-counter {
+  display: inline-block;
+  background: #000;
+  color: var(--phosphor);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.1rem;
+  letter-spacing: 4px;
+  padding: 4px 12px;
+  border: 2px inset #333;
+  margin: 8px 0;
+}
+
+.netscape-badge {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.netscape-badge span {
+  color: var(--cyan);
+}
+
+.webring {
+  margin-top: 8px;
+  font-size: 0.75rem;
+}
+
+.webring a {
+  margin: 0 4px;
+}
+
+/* Cookie notice — unused on minimal site */
+
+/* ── Legal pages ── */
+.legal-page .site-frame {
+  max-width: 780px;
+}
+
+.legal-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.legal-header h1 {
+  font-family: "Courier New", Courier, monospace;
+  color: var(--amber);
+  font-size: 1.6rem;
+  margin: 0 0 8px;
+}
+
+.legal-header p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.legal-updated {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.75rem;
+  color: var(--phosphor-dim);
+  margin-top: 8px;
+}
+
+.legal-section {
+  margin-bottom: 16px;
+  border: 2px groove var(--phosphor-dim);
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.legal-section h2 {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.1rem;
+  color: var(--phosphor);
+  margin: 0 0 8px;
+  border-bottom: 1px dashed var(--phosphor-dim);
+  padding-bottom: 4px;
+}
+
+.legal-section h3 {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.95rem;
+  color: var(--amber);
+  margin: 12px 0 6px;
+}
+
+.legal-section p,
+.legal-section li {
+  font-size: 0.9rem;
+  margin: 0 0 8px;
+}
+
+.legal-section ul {
+  padding-left: 20px;
+  margin: 0 0 8px;
+}
+
+.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+
+.legal-table th,
+.legal-table td {
+  border: 2px inset #444;
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.legal-table th {
+  background: #1a2a1f;
+  color: var(--amber);
+  font-family: "Courier New", Courier, monospace;
+}
+
+.legal-nav {
+  text-align: center;
+  padding: 12px;
+  border: 2px dashed var(--purple);
+  margin-top: 16px;
+}
+
+.legal-nav a {
+  margin: 0 8px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.85rem;
+}
+
+.back-home {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.85rem;
+}
+
+/* ── Animations ── */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes rainbow-text {
+  0% {
+    color: var(--hot-pink);
+  }
+  16% {
+    color: var(--amber);
+  }
+  33% {
+    color: var(--yellow);
+  }
+  50% {
+    color: var(--phosphor);
+  }
+  66% {
+    color: var(--cyan);
+  }
+  83% {
+    color: var(--purple);
+  }
+  100% {
+    color: var(--hot-pink);
+  }
+}
+
+@keyframes rainbow-shift {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes wobble {
+  0%,
+  100% {
+    transform: rotate(-1deg);
+  }
+  50% {
+    transform: rotate(1deg);
+  }
+}
+
+/* Under construction gif-style */
+.construction {
+  text-align: center;
+  font-size: 1.5rem;
+  animation: wobble 0.5s ease infinite;
+}
+
+/* Responsive-ish (even 90's sites had SOME consideration) */
+@media (max-width: 700px) {
+  .hero-table,
+  .hero-table tbody,
+  .hero-table tr,
+  .hero-table td,
+  .install-table,
+  .install-table tbody,
+  .install-table tr,
+  .install-table td,
+  .screenshot-grid,
+  .screenshot-grid tbody,
+  .screenshot-grid tr,
+  .screenshot-grid td,
+  .features-grid,
+  .features-grid tbody,
+  .features-grid tr,
+  .features-grid td {
+    display: block;
+    width: 100%;
+  }
+
+  .site-header__logo {
+    font-size: 1.6rem;
+  }
+
+  .hero-text h1 {
+    font-size: 1.4rem;
+  }
+}
