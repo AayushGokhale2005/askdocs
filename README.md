@@ -9,7 +9,7 @@ A terminal-based, learning-first code editor. The AI layer is a Socratic tutor â
 ### Homebrew (recommended)
 
 ```bash
-brew tap askdocs/tap
+brew tap AayushGokhale2005/tap
 brew install askdocs
 ```
 

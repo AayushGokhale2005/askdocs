@@ -1,1 +1,4 @@
 ./landing_page/
+build/
+.local/
+.DS_Store
