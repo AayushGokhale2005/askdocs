@@ -50,7 +50,7 @@ body {
 
 /* Classic tiled border frame */
 .site-frame {
-  max-width: 960px;
+  max-width: 1080px;
   margin: 12px auto;
   padding: 4px;
   border: 4px ridge var(--phosphor);
@@ -322,14 +322,13 @@ section {
 }
 
 /* ── Hero ── */
-.hero-table {
-  width: 100%;
-  border-collapse: collapse;
+.hero-text {
+  text-align: center;
+  margin-bottom: 12px;
 }
 
-.hero-table td {
-  vertical-align: top;
-  padding: 8px;
+.hero-text .btn-row {
+  justify-content: center;
 }
 
 .hero-text h1 {
@@ -417,19 +416,22 @@ section {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 12px;
+  padding: 4px;
   position: relative;
+  overflow: hidden;
 }
 
 .screenshot-box img {
+  width: 100%;
   max-width: 100%;
   height: auto;
   border: 2px solid var(--phosphor);
   display: block;
 }
 
-.screenshot-box--featured {
-  min-height: 260px;
+.screenshot-box--hero {
+  min-height: 0;
+  padding: 2px;
 }
 
 .screenshot-placeholder {

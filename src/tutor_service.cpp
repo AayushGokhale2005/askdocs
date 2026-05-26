@@ -109,7 +109,10 @@ std::string search_step_label(const docs::OnlineDocHit& hit) {
     if (hit.source == "web") {
         return "search web → " + hit.title;
     }
-    return "search online docs → " + hit.title + " (" + hit.source + ")";
+    if (hit.source == "devdocs.io") {
+        return "search docs → " + hit.title + " (devdocs.io)";
+    }
+    return "search docs → " + hit.title + " (" + hit.source + ")";
 }
 
 std::string topic_query_for(const TutorRequest& request) {
@@ -124,9 +127,9 @@ std::string topic_query_for(const TutorRequest& request) {
 
 std::string search_empty_step_label() {
     if (!docs::online_search_enabled()) {
-        return "search web → (disabled)";
+        return "search docs → (disabled)";
     }
-    return "search web → (no results)";
+    return "search docs → (no results)";
 }
 
 bool routes_to_topic_explain(const TutorRequest& request, std::string_view query) {
@@ -171,7 +174,12 @@ std::string TutorService::compose_response(const TutorRequest& request, nlp::Use
     if (intent == nlp::UserIntent::Explain && !online_hits.empty()) {
         const std::string topic = agent::extract_topic_from_query(query);
         if (!topic.empty()) {
-            out << agent::explain_topic_overview(topic, online_hits) << "\n\n";
+            agent::ConceptSearchResult search;
+            search.concept_name = topic;
+            search.query_used = topic;
+            search.online_hits = online_hits;
+            search.primary = online_hits.front();
+            return agent::compose_learn_response(nullptr, search, ctx);
         }
         out << online_hits.front().title << "\n";
         out << online_hits.front().url;
@@ -184,11 +192,14 @@ std::string TutorService::compose_response(const TutorRequest& request, nlp::Use
     if (intent == nlp::UserIntent::Explain) {
         const std::string topic = agent::extract_topic_from_query(query);
         if (!topic.empty()) {
-            out << agent::explain_topic_overview(topic, online_hits);
+            agent::ConceptSearchResult search;
+            search.concept_name = topic;
+            search.query_used = topic;
+            search.online_hits = online_hits;
             if (!online_hits.empty()) {
-                out << "\n\n" << online_hits.front().url;
+                search.primary = online_hits.front();
             }
-            return out.str();
+            return agent::compose_learn_response(nullptr, search, ctx);
         }
     }
 

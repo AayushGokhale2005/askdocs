@@ -30,7 +30,7 @@ askdocs README.md
 askdocs                    # start with empty buffer + file explorer
 ```
 
-Online doc search uses `curl` (built into macOS). Requires network for `/learn`, `/explain`, etc. Set `ASKDOCS_ONLINE=0` to disable. No local doc corpus is bundled or required.
+Online doc search uses `curl` (built into macOS). Requires network for `/learn`, `/explain`, etc. C/C++ docs come from [devdocs.io/cpp](https://devdocs.io/cpp/). Set `ASKDOCS_ONLINE=0` to disable. No local doc corpus is bundled or required.
 
 ### Tutor commands (online docs)
 

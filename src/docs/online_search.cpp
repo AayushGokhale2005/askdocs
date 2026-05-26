@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <iomanip>
 #include <sstream>
+#include <string>
+#include <vector>
 
 namespace askdocs::docs {
 
@@ -52,7 +54,7 @@ std::string url_encode(std::string_view text) {
     return encoded.str();
 }
 
-std::string http_get(std::string_view url) {
+std::string http_get(std::string_view url, std::size_t max_bytes = 48'000) {
     const std::string cmd =
         "curl -sL --max-time 12 -A 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' " +
@@ -63,7 +65,7 @@ std::string http_get(std::string_view url) {
     if (pipe == nullptr) {
         return {};
     }
-    while (true) {
+    while (body.size() < max_bytes) {
         const std::size_t n = std::fread(buf.data(), 1, buf.size(), pipe);
         if (n == 0) {
             break;
@@ -71,10 +73,32 @@ std::string http_get(std::string_view url) {
         body.append(buf.data(), n);
     }
     pclose(pipe);
-    if (body.size() > 48'000) {
-        body.resize(48'000);
+    if (body.size() > max_bytes) {
+        body.resize(max_bytes);
     }
     return body;
+}
+
+std::string& devdocs_cpp_index_cache() {
+    static std::string cache;
+    return cache;
+}
+
+std::string fetch_devdocs_cpp_index() {
+    std::string& cache = devdocs_cpp_index_cache();
+    if (!cache.empty()) {
+        return cache;
+    }
+    cache = http_get("https://documents.devdocs.io/cpp/index.json", 2'000'000);
+    return cache;
+}
+
+std::vector<OnlineDocHit> search_devdocs_cpp(std::string_view query) {
+    const std::string index = fetch_devdocs_cpp_index();
+    if (index.empty()) {
+        return {};
+    }
+    return parse_devdocs_index_search(index, query, 5);
 }
 
 std::string pick_query_terms(std::string_view query) {
@@ -116,13 +140,6 @@ void add_unique(std::vector<OnlineDocHit>& hits, OnlineDocHit hit) {
         }
     }
     hits.push_back(std::move(hit));
-}
-
-std::vector<OnlineDocHit> search_cppreference(std::string_view query) {
-    const std::string terms = pick_query_terms(query);
-    const std::string url =
-        "https://en.cppreference.com/w/Special:Search?search=" + url_encode(terms) + "&fulltext=1";
-    return parse_cppreference_html(http_get(url));
 }
 
 std::vector<OnlineDocHit> search_python_docs(std::string_view query) {
@@ -170,11 +187,11 @@ std::vector<OnlineDocHit> search_online_docs(std::string_view query, std::string
 
     std::vector<OnlineDocHit> hits;
     if (lang == "cpp" || lang == "c++" || lang == "c") {
-        hits = search_cppreference(query);
+        hits = search_devdocs_cpp(query);
     } else if (lang == "python" || lang == "py") {
         hits = search_python_docs(query);
     } else {
-        for (OnlineDocHit& h : search_cppreference(query)) {
+        for (OnlineDocHit& h : search_devdocs_cpp(query)) {
             add_unique(hits, std::move(h));
         }
         for (OnlineDocHit& h : search_python_docs(query)) {
@@ -192,6 +209,43 @@ std::vector<OnlineDocHit> search_online_docs(std::string_view query, std::string
         hits.resize(limit);
     }
     return hits;
+}
+
+std::string fetch_doc_snippet(const OnlineDocHit& hit) {
+    if (hit.url.empty()) {
+        return {};
+    }
+
+    const std::string html = http_get(hit.url);
+    if (html.empty()) {
+        return {};
+    }
+
+    if (hit.source == "devdocs.io" || hit.url.find("devdocs.io/cpp/") != std::string::npos) {
+        const std::string_view prefix = "https://devdocs.io/cpp/";
+        if (hit.url.rfind(prefix, 0) == 0) {
+            const std::string path = hit.url.substr(prefix.size());
+            const std::string page_url = "https://documents.devdocs.io/cpp/" + path + ".html";
+            return parse_devdocs_page_snippet(http_get(page_url));
+        }
+    }
+    if (hit.source == "cppreference.com" || hit.url.find("cppreference.com") != std::string::npos) {
+        return parse_cppreference_article_snippet(html);
+    }
+    if (hit.source == "docs.python.org" || hit.url.find("docs.python.org") != std::string::npos) {
+        return parse_python_docs_article_snippet(html);
+    }
+    if (hit.source == "web" && hit.url.find("wikipedia.org") != std::string::npos) {
+        const std::string_view wiki_prefix = "https://en.wikipedia.org/wiki/";
+        if (hit.url.rfind(wiki_prefix, 0) == 0) {
+            const std::string page = hit.url.substr(wiki_prefix.size());
+            const std::string summary_url =
+                "https://en.wikipedia.org/api/rest_v1/page/summary/" + page;
+            return parse_wikipedia_summary_extract(http_get(summary_url));
+        }
+    }
+
+    return {};
 }
 
 }  // namespace askdocs::docs

@@ -32,7 +32,7 @@ Commands (`/hint`, `/path`, `/learn`, …) override the classifier.
 
 The agent calls `search_online_docs(query, lang)` which uses `curl` to search:
 
-- **C/C++** → [cppreference.com](https://en.cppreference.com)
+- **C/C++** → [devdocs.io/cpp](https://devdocs.io/cpp/) (cppreference mirror)
 - **Python** → [docs.python.org](https://docs.python.org)
 - **Fallback** → DuckDuckGo site-restricted search
 

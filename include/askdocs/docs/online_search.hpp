@@ -21,4 +21,7 @@ std::vector<OnlineDocHit> search_online_docs(std::string_view query, std::string
 
 bool online_search_enabled();
 
+// Fetch and parse a doc page when search results have no snippet text.
+std::string fetch_doc_snippet(const OnlineDocHit& hit);
+
 }  // namespace askdocs::docs

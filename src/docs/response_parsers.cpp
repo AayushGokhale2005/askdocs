@@ -1,10 +1,12 @@
 #include "askdocs/docs/response_parsers.hpp"
+#include "askdocs/nlp/tokenizer.hpp"
 
 #include <nlohmann/json.hpp>
 #include <pugixml.hpp>
 
 #include <algorithm>
 #include <cctype>
+#include <sstream>
 #include <string>
 
 namespace askdocs::docs {
@@ -58,6 +60,46 @@ std::string absolute_python_url(const char* href) {
         return "https://docs.python.org/3/" + path;
     }
     return "https://docs.python.org" + path;
+}
+
+std::string to_lower_copy(std::string_view text) {
+    std::string out(text);
+    for (char& c : out) {
+        c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    }
+    return out;
+}
+
+bool is_devdocs_stopword(std::string_view tok) {
+    static const char* kStop[] = {
+        "teach", "me",   "the",  "concept", "used", "in",   "line", "a",    "an",   "what",
+        "does",  "do",   "is",   "how",     "why",  "at",   "on",   "of",   "to",   "for",
+        "and",   "or",   "are",  "about",   "tell", "work", "mean", "define", "your", "this",
+        "element", "elements",
+    };
+    for (const char* w : kStop) {
+        if (tok == w) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void expand_devdocs_query_tokens(std::vector<std::string>& tokens) {
+    static const char* kSynonyms[][2] = {
+        {"delete", "erase"}, {"remove", "erase"}, {"add", "push"},
+        {"insert", "emplace"}, {"length", "size"}, {"initialize", "init"},
+        {"initialise", "init"}, {"create", "construct"},
+    };
+
+    const std::vector<std::string> original = tokens;
+    for (const auto& pair : kSynonyms) {
+        for (const std::string& tok : original) {
+            if (tok == pair[0]) {
+                tokens.push_back(pair[1]);
+            }
+        }
+    }
 }
 
 }  // namespace
@@ -198,6 +240,239 @@ std::vector<OnlineDocHit> parse_python_docs_html(const std::string& html) {
     }
 
     return hits;
+}
+
+std::string parse_cppreference_article_snippet(const std::string& html) {
+    pugi::xml_document doc;
+    const pugi::xml_parse_result result =
+        doc.load_string(html.c_str(), pugi::parse_default | pugi::parse_ws_pcdata);
+    if (!result) {
+        return {};
+    }
+
+    std::ostringstream out;
+    for (pugi::xpath_node xpath :
+         doc.select_nodes("//div[contains(@class,'mw-parser-output')]//p")) {
+        const std::string text = trim(xpath.node().text().as_string());
+        if (text.size() < 40 || text.find("cppreference") != std::string::npos) {
+            continue;
+        }
+        out << text;
+        break;
+    }
+
+    int example_count = 0;
+    for (pugi::xpath_node xpath :
+         doc.select_nodes("//div[contains(@class,'t-example')]//pre|//div[contains(@class,'"
+                          "t-example-reason')]//pre")) {
+        const std::string code = trim(xpath.node().text().as_string());
+        if (code.empty() || code.size() > 400) {
+            continue;
+        }
+        if (!out.str().empty()) {
+            out << "\n\n";
+        }
+        out << code;
+        ++example_count;
+        if (example_count >= 3) {
+            break;
+        }
+    }
+
+    if (out.str().empty()) {
+        for (pugi::xpath_node xpath : doc.select_nodes("//div[contains(@class,'mw-parser-output')]//pre")) {
+            const std::string code = trim(xpath.node().text().as_string());
+            if (code.empty() || code.size() > 400) {
+                continue;
+            }
+            out << code;
+            break;
+        }
+    }
+
+    return trim(out.str());
+}
+
+std::string parse_python_docs_article_snippet(const std::string& html) {
+    pugi::xml_document doc;
+    const pugi::xml_parse_result result =
+        doc.load_string(html.c_str(), pugi::parse_default | pugi::parse_ws_pcdata);
+    if (!result) {
+        return {};
+    }
+
+    std::ostringstream out;
+    for (pugi::xpath_node xpath :
+         doc.select_nodes("//div[contains(@class,'body')]//p|//section//p")) {
+        const std::string text = trim(xpath.node().text().as_string());
+        if (text.size() < 30) {
+            continue;
+        }
+        out << text;
+        break;
+    }
+
+    int example_count = 0;
+    for (pugi::xpath_node xpath :
+         doc.select_nodes("//div[contains(@class,'highlight')]//pre|//pre[contains(@class,'python')]")) {
+        const std::string code = trim(xpath.node().text().as_string());
+        if (code.empty() || code.size() > 400) {
+            continue;
+        }
+        if (!out.str().empty()) {
+            out << "\n\n";
+        }
+        out << code;
+        ++example_count;
+        if (example_count >= 3) {
+            break;
+        }
+    }
+
+    return trim(out.str());
+}
+
+std::vector<OnlineDocHit> parse_devdocs_index_search(const std::string& index_json,
+                                                     std::string_view query,
+                                                     std::size_t limit) {
+    std::vector<OnlineDocHit> hits;
+
+    const nlohmann::json parsed = nlohmann::json::parse(index_json, nullptr, false);
+    if (parsed.is_discarded() || !parsed.is_object()) {
+        return hits;
+    }
+
+    const nlohmann::json* entries = nullptr;
+    if (parsed.contains("entries") && parsed["entries"].is_array()) {
+        entries = &parsed["entries"];
+    } else if (parsed.is_array()) {
+        entries = &parsed;
+    }
+    if (entries == nullptr) {
+        return hits;
+    }
+
+    std::vector<std::string> tokens;
+    for (const std::string& tok : nlp::tokenize(query)) {
+        if (!is_devdocs_stopword(tok) && tok.size() >= 2) {
+            tokens.push_back(to_lower_copy(tok));
+        }
+    }
+    expand_devdocs_query_tokens(tokens);
+    if (tokens.empty()) {
+        return hits;
+    }
+
+    struct ScoredHit {
+        OnlineDocHit hit;
+        int score = 0;
+    };
+    std::vector<ScoredHit> scored;
+
+    for (const nlohmann::json& entry : *entries) {
+        if (!entry.is_object() || !entry.contains("name") || !entry.contains("path")) {
+            continue;
+        }
+        if (!entry["name"].is_string() || !entry["path"].is_string()) {
+            continue;
+        }
+
+        const std::string name = entry["name"].get<std::string>();
+        const std::string path = entry["path"].get<std::string>();
+        const std::string name_lower = to_lower_copy(name);
+        const std::string path_lower = to_lower_copy(path);
+
+        int score = 0;
+        int token_hits = 0;
+        for (const std::string& tok : tokens) {
+            if (name_lower.find(tok) != std::string::npos) {
+                score += 5;
+                ++token_hits;
+            } else if (path_lower.find(tok) != std::string::npos) {
+                score += 2;
+                ++token_hits;
+            }
+        }
+        if (token_hits == 0) {
+            continue;
+        }
+
+        OnlineDocHit hit;
+        hit.title = name;
+        hit.url = "https://devdocs.io/cpp/" + path;
+        hit.source = "devdocs.io";
+        hit.score = static_cast<float>(score);
+        scored.push_back({std::move(hit), score});
+    }
+
+    std::sort(scored.begin(), scored.end(),
+              [](const ScoredHit& a, const ScoredHit& b) { return a.score > b.score; });
+
+    for (const ScoredHit& item : scored) {
+        add_unique(hits, item.hit);
+        if (hits.size() >= limit) {
+            break;
+        }
+    }
+
+    return hits;
+}
+
+std::string parse_devdocs_page_snippet(const std::string& html) {
+    pugi::xml_document doc;
+    const pugi::xml_parse_result result =
+        doc.load_string(html.c_str(), pugi::parse_default | pugi::parse_ws_pcdata);
+    if (!result) {
+        return {};
+    }
+
+    std::ostringstream out;
+    int signature_count = 0;
+    for (pugi::xpath_node xpath : doc.select_nodes("//pre[@data-language='cpp']")) {
+        const std::string code = trim(xpath.node().text().as_string());
+        if (code.empty() || code.size() > 300) {
+            continue;
+        }
+        if (!out.str().empty()) {
+            out << "\n\n";
+        }
+        out << code;
+        ++signature_count;
+        if (signature_count >= 2) {
+            break;
+        }
+    }
+
+    for (pugi::xpath_node xpath : doc.select_nodes("//p")) {
+        const std::string text = trim(xpath.node().text().as_string());
+        if (text.size() < 20) {
+            continue;
+        }
+        if (!out.str().empty()) {
+            out << "\n\n";
+        }
+        out << text;
+        break;
+    }
+
+    int example_count = 0;
+    for (pugi::xpath_node xpath :
+         doc.select_nodes("//div[contains(@class,'t-example')]//pre|//pre[@data-language='cpp-example']")) {
+        const std::string code = trim(xpath.node().text().as_string());
+        if (code.empty() || code.size() > 500) {
+            continue;
+        }
+        if (!out.str().empty()) {
+            out << "\n\n";
+        }
+        out << code;
+        ++example_count;
+        if (example_count >= 2) {
+            break;
+        }
+    }
+
+    return trim(out.str());
 }
 
 }  // namespace askdocs::docs

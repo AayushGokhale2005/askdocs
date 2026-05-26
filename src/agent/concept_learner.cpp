@@ -108,7 +108,7 @@ bool is_open_topic_query(std::string_view query) {
         std::regex(R"(\bwhat\s+(?:is|are)\b)", std::regex::icase),
         std::regex(R"(\bexplain\b)", std::regex::icase),
         std::regex(R"(\btell\s+me\s+about\b)", std::regex::icase),
-        std::regex(R"(\bhow\s+(?:do|does)\b)", std::regex::icase),
+        std::regex(R"(\bhow\s+(?:do|does|to)\b)", std::regex::icase),
         std::regex(R"(\bdefine\b)", std::regex::icase),
         std::regex(R"(\bwhat\s+does\b.+\bmean\b)", std::regex::icase),
     };
@@ -145,7 +145,7 @@ std::string extract_topic_from_query(std::string_view query) {
         std::regex(R"(^what\s+(?:is|are)\s+(?:a|an|the\s+)?)", std::regex::icase),
         std::regex(R"(^explain\s+(?:what\s+)?(?:a|an|the\s+)?)", std::regex::icase),
         std::regex(R"(^tell\s+me\s+about\s+(?:a|an|the\s+)?)", std::regex::icase),
-        std::regex(R"(^how\s+(?:do|does)\s+(?:a|an|the\s+)?)", std::regex::icase),
+        std::regex(R"(^how\s+(?:do|does|to)\s+(?:a|an|the\s+)?)", std::regex::icase),
         std::regex(R"(^define\s+(?:a|an|the\s+)?)", std::regex::icase),
         std::regex(R"(^what\s+does\s+(?:a|an|the\s+)?)", std::regex::icase),
         std::regex(R"(^can\s+you\s+explain\s+(?:a|an|the\s+)?)", std::regex::icase),
@@ -286,6 +286,192 @@ std::string build_search_query(const LineSnapshot* line, std::string_view user_q
     return trim(combined.str());
 }
 
+struct ScoredContextLine {
+    std::string path;
+    int line_number = 0;
+    std::string text;
+    int score = 0;
+    int token_hits = 0;
+};
+
+std::string basename_only(std::string_view path) {
+    const std::size_t pos = path.find_last_of("/\\");
+    return pos == std::string_view::npos ? std::string(path) : std::string(path.substr(pos + 1));
+}
+
+bool looks_like_code_line(std::string_view line) {
+    return line.find('=') != std::string_view::npos || line.find('(') != std::string_view::npos ||
+           line.find(';') != std::string_view::npos || line.find('{') != std::string_view::npos ||
+           line.find("->") != std::string_view::npos || line.find("::") != std::string_view::npos;
+}
+
+std::vector<std::string> topic_tokens(std::string_view topic) {
+    std::vector<std::string> tokens;
+    for (const std::string& tok : nlp::tokenize(topic)) {
+        if (!is_stopword(tok) && tok.size() >= 2) {
+            tokens.push_back(to_lower_copy(tok));
+        }
+    }
+    return tokens;
+}
+
+bool is_action_token(std::string_view tok) {
+    static const char* kActions[] = {
+        "delete", "remove", "erase", "add", "insert", "push", "pop", "clear",
+        "resize", "sort", "find", "search", "swap", "copy", "move", "assign",
+        "initialize", "init", "create", "construct", "destroy", "access",
+    };
+    for (const char* action : kActions) {
+        if (tok == action) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool line_matches_action(std::string_view lower_line, std::string_view action) {
+    if (lower_line.find(action) != std::string_view::npos) {
+        return true;
+    }
+    if (action == "delete" || action == "remove") {
+        return lower_line.find("erase") != std::string_view::npos;
+    }
+    if (action == "add" || action == "insert") {
+        return lower_line.find("push") != std::string_view::npos ||
+               lower_line.find("emplace") != std::string_view::npos;
+    }
+    if (action == "initialize" || action == "init") {
+        return lower_line.find('{') != std::string_view::npos ||
+               lower_line.find('(') != std::string_view::npos;
+    }
+    return false;
+}
+
+int score_context_line(std::string_view line, const std::vector<std::string>& tokens,
+                       int& token_hits) {
+    token_hits = 0;
+    const std::string trimmed = trim(std::string(line));
+    if (trimmed.empty()) {
+        return 0;
+    }
+
+    const std::string lower = to_lower_copy(trimmed);
+    bool query_has_action = false;
+    bool action_matched = false;
+    int score = 0;
+    for (const std::string& tok : tokens) {
+        if (is_action_token(tok)) {
+            query_has_action = true;
+            if (line_matches_action(lower, tok)) {
+                action_matched = true;
+            }
+        }
+        if (lower.find(tok) != std::string::npos) {
+            score += 2;
+            ++token_hits;
+        }
+    }
+
+    if (token_hits == 0) {
+        return 0;
+    }
+    if (query_has_action && !action_matched) {
+        return 0;
+    }
+
+    if (looks_like_code_line(trimmed)) {
+        score += 1;
+    }
+    if (trimmed.find("//") != std::string::npos || trimmed.find('#') == 0) {
+        score += 1;
+    }
+    return score;
+}
+
+std::vector<ScoredContextLine> find_context_examples(const ResolvedContext& ctx,
+                                                       std::string_view topic) {
+    const std::vector<std::string> tokens = topic_tokens(topic);
+    if (tokens.empty() || ctx.files.empty()) {
+        return {};
+    }
+
+    std::vector<ScoredContextLine> matches;
+    for (const FileSlice& slice : ctx.files) {
+        for (std::size_t i = 0; i < slice.lines.size(); ++i) {
+            int token_hits = 0;
+            const int score = score_context_line(slice.lines[i], tokens, token_hits);
+            if (score < 2 || token_hits == 0) {
+                continue;
+            }
+            matches.push_back({slice.path, slice.start_line + static_cast<int>(i) + 1,
+                               trim(slice.lines[i]), score, token_hits});
+        }
+    }
+
+    std::sort(matches.begin(), matches.end(),
+              [](const ScoredContextLine& a, const ScoredContextLine& b) {
+                  if (a.score != b.score) {
+                      return a.score > b.score;
+                  }
+                  return a.line_number < b.line_number;
+              });
+
+    std::vector<ScoredContextLine> deduped;
+    for (const ScoredContextLine& match : matches) {
+        const bool duplicate = std::any_of(
+            deduped.begin(), deduped.end(),
+            [&](const ScoredContextLine& existing) { return existing.text == match.text; });
+        if (!duplicate) {
+            deduped.push_back(match);
+        }
+        if (deduped.size() >= 8) {
+            break;
+        }
+    }
+    return deduped;
+}
+
+std::string format_context_examples(const std::vector<ScoredContextLine>& examples,
+                                    bool related_only) {
+    if (examples.empty()) {
+        return {};
+    }
+
+    std::ostringstream out;
+    out << (related_only ? "Related in your code:\n" : "Syntax from your code:\n");
+    std::string current_file;
+    for (const ScoredContextLine& example : examples) {
+        const std::string file = basename_only(example.path);
+        if (file != current_file) {
+            if (!current_file.empty()) {
+                out << '\n';
+            }
+            out << file << ":\n";
+            current_file = file;
+        }
+        out << "  " << example.line_number << " | " << example.text << '\n';
+    }
+    return out.str();
+}
+
+bool has_doc_snippet(const std::vector<docs::OnlineDocHit>& online_hits) {
+    for (const docs::OnlineDocHit& hit : online_hits) {
+        if (!hit.snippet.empty()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void enrich_online_hits(std::vector<docs::OnlineDocHit>& hits) {
+    for (docs::OnlineDocHit& hit : hits) {
+        if (!hit.snippet.empty()) {
+            continue;
+        }
+        hit.snippet = docs::fetch_doc_snippet(hit);
+    }
+}
+
 }  // namespace
 
 ConceptSearchResult search_concepts(const LineSnapshot* line, std::string_view user_query,
@@ -305,6 +491,8 @@ ConceptSearchResult search_concepts(const LineSnapshot* line, std::string_view u
     if (result.online_hits.size() > 5) {
         result.online_hits.resize(5);
     }
+
+    enrich_online_hits(result.online_hits);
 
     if (!result.online_hits.empty()) {
         result.primary = result.online_hits.front();
@@ -387,7 +575,11 @@ std::string explain_topic_overview(std::string_view concept_name,
 
 std::string compose_learn_response(const LineSnapshot* line, const ConceptSearchResult& search,
                                    const ResolvedContext& ctx) {
-    (void)ctx;
+    const std::string topic_query =
+        search.query_used.empty() ? search.concept_name : search.query_used;
+    const std::vector<ScoredContextLine> context_examples =
+        find_context_examples(ctx, topic_query);
+
     std::ostringstream out;
     out << capitalize(search.concept_name) << "\n\n";
 
@@ -404,7 +596,18 @@ std::string compose_learn_response(const LineSnapshot* line, const ConceptSearch
         out << "\nWhat this concept does here:\n";
         out << explain_concept_on_line(*line, search.concept_name) << "\n";
     } else {
-        out << explain_topic_overview(search.concept_name, search.online_hits) << "\n";
+        const bool docs_first = has_doc_snippet(search.online_hits);
+        if (docs_first) {
+            out << explain_topic_overview(search.concept_name, search.online_hits) << "\n";
+            if (!context_examples.empty()) {
+                out << '\n' << format_context_examples(context_examples, true);
+            }
+        } else {
+            if (!context_examples.empty()) {
+                out << format_context_examples(context_examples, false) << "\n";
+            }
+            out << explain_topic_overview(search.concept_name, search.online_hits) << "\n";
+        }
     }
 
     if (!search.online_hits.empty()) {
